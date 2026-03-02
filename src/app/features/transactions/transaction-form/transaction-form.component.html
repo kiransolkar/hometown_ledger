@@ -1,0 +1,136 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit Transaction' : 'Add New Transaction' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="transactionForm">
+    <!-- Display selected member name in edit mode -->
+    <div *ngIf="isEditMode" class="selected-member-banner">
+      <strong>Transaction for:</strong> {{ transactionForm.get('memberSearch')?.value }}
+    </div>
+
+    <div class="form-container">
+      <!-- Member Selection - Only show in Add mode -->
+      <mat-form-field *ngIf="!isEditMode" class="w-100" appearance="outline">
+        <mat-label>Select Member</mat-label>
+        <input
+          type="text"
+          matInput
+          formControlName="memberSearch"
+          [matAutocomplete]="auto"
+          placeholder="Search by name or email"
+          required>
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayMemberFn.bind(this)">
+          <mat-option *ngFor="let member of filteredMembers | async" [value]="member" (onSelectionChange)="onMemberSelected(member)">
+            {{ member.fullName }} ({{ member.emailAddress }})
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="transactionForm.get('memberId')?.hasError('required')">
+          Please select a member
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Year -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Year</mat-label>
+        <input matInput type="number" formControlName="year" required>
+        <mat-error *ngIf="transactionForm.get('year')?.hasError('required')">
+          Year is required
+        </mat-error>
+        <mat-error *ngIf="transactionForm.get('year')?.hasError('min') || transactionForm.get('year')?.hasError('max')">
+          Year must be between 2020 and 2050
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Annual Fee -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Annual Fee (₹)</mat-label>
+        <input matInput type="number" formControlName="annualFee" min="0" required>
+        <mat-error *ngIf="transactionForm.get('annualFee')?.hasError('required')">
+          Annual fee is required
+        </mat-error>
+        <mat-error *ngIf="transactionForm.get('annualFee')?.hasError('min')">
+          Amount must be positive
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Meetings Attended -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Meetings Attended (out of 4)</mat-label>
+        <input matInput type="number" formControlName="meetingsAttended" min="0" max="4" required>
+        <mat-hint>Enter 0-4. Meeting Fine = 300 × (4 - Meetings Attended)</mat-hint>
+        <mat-error *ngIf="transactionForm.get('meetingsAttended')?.hasError('required')">
+          Number of meetings attended is required
+        </mat-error>
+        <mat-error *ngIf="transactionForm.get('meetingsAttended')?.hasError('min') || transactionForm.get('meetingsAttended')?.hasError('max')">
+          Must be between 0 and 4
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Meeting Fine (Auto-calculated, read-only) -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Meeting Fine (₹)</mat-label>
+        <input matInput type="number" formControlName="meetingFine" readonly>
+        <mat-hint>Auto-calculated based on meetings attended</mat-hint>
+      </mat-form-field>
+
+      <!-- Misc Fine -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Miscellaneous Fine (₹)</mat-label>
+        <input matInput type="number" formControlName="miscFine" min="0">
+        <mat-hint>Enter any additional fines or penalties</mat-hint>
+        <mat-error *ngIf="transactionForm.get('miscFine')?.hasError('min')">
+          Amount must be positive
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Total Amount (Auto-calculated, read-only) -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Total Amount (₹)</mat-label>
+        <input matInput type="number" formControlName="totalAmount" readonly>
+        <mat-hint>Auto-calculated: Annual Fee + Meeting Fine + Misc Fine</mat-hint>
+      </mat-form-field>
+
+      <!-- Amount Paid -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Amount Paid (₹)</mat-label>
+        <input matInput type="number" formControlName="amountPaid" min="0" required>
+        <mat-error *ngIf="transactionForm.get('amountPaid')?.hasError('required')">
+          Amount paid is required
+        </mat-error>
+        <mat-error *ngIf="transactionForm.get('amountPaid')?.hasError('min')">
+          Amount must be positive
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Pending Amount (Auto-calculated, read-only) -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Pending Amount (₹)</mat-label>
+        <input matInput type="number" formControlName="pendingAmount" readonly>
+        <mat-hint>Auto-calculated: Total Amount - Amount Paid</mat-hint>
+      </mat-form-field>
+
+      <!-- Date -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Transaction Date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="date" required>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="transactionForm.get('date')?.hasError('required')">
+          Date is required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Notes -->
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Notes (Optional)</mat-label>
+        <textarea matInput formControlName="notes" rows="3" placeholder="Additional notes..."></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!transactionForm.valid">
+    {{ isEditMode ? 'Update' : 'Add' }} Transaction
+  </button>
+</mat-dialog-actions>

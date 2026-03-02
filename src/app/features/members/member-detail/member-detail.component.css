@@ -1,0 +1,93 @@
+.member-detail-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.header-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-section h2 {
+  margin: 0;
+}
+
+mat-card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+mat-card-header {
+  margin-bottom: 24px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+mat-card-content {
+  padding: 24px 0;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.left-buttons,
+.right-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Form Styling */
+mat-form-field {
+  width: 100%;
+}
+
+form {
+  width: 100%;
+}
+
+/* Disabled form fields styling */
+mat-form-field.mat-form-field-disabled {
+  opacity: 1;
+}
+
+mat-form-field.mat-form-field-disabled .mat-mdc-input-element {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .left-buttons,
+  .right-buttons {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .left-buttons button,
+  .right-buttons button {
+    flex: 1;
+  }
+
+  mat-card-title {
+    font-size: 1.25rem;
+  }
+}

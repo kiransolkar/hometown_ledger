@@ -1,0 +1,139 @@
+<div class="transaction-list-container">
+  <div class="container-fluid py-4">
+    <div class="header-section mb-4">
+      <h2>Transaction Management</h2>
+      <div class="button-group">
+        <button mat-raised-button color="accent" (click)="downloadExcel()">
+          <mat-icon>download</mat-icon>
+          Download Excel
+        </button>
+        <button mat-raised-button color="primary" (click)="openTransactionForm()">
+          <mat-icon>add</mat-icon>
+          Add Transaction
+        </button>
+        
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section mb-3">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <mat-form-field class="w-100" appearance="outline">
+            <mat-label>Filter by Year</mat-label>
+            <mat-select [(ngModel)]="selectedYear" (selectionChange)="applyFilters()">
+              <mat-option value="">All Years</mat-option>
+              <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-12 col-md-6 d-flex align-items-start">
+          <button mat-raised-button class="w-100 clear-btn" (click)="clearFilters()">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="table-container mat-elevation-z2">
+      <table mat-table [dataSource]="dataSource" matSort class="w-100">
+        <!-- Member Name Column -->
+        <ng-container matColumnDef="memberName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Member Name</th>
+          <td mat-cell *matCellDef="let transaction">{{ transaction.memberName }}</td>
+        </ng-container>
+
+        <!-- Year Column -->
+        <ng-container matColumnDef="year">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Year</th>
+          <td mat-cell *matCellDef="let transaction">{{ transaction.year }}</td>
+        </ng-container>
+
+        <!-- Annual Fee Column -->
+        <ng-container matColumnDef="annualFee">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Annual Fee</th>
+          <td mat-cell *matCellDef="let transaction" class="amount-cell">
+            ₹{{ transaction.annualFee | number:'1.0-0' }}
+          </td>
+        </ng-container>
+
+        <!-- Meeting Fine Column -->
+        <ng-container matColumnDef="meetingFine">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Meeting Fine</th>
+          <td mat-cell *matCellDef="let transaction" class="amount-cell">
+            ₹{{ transaction.meetingFine | number:'1.0-0' }}
+          </td>
+        </ng-container>
+
+        <!-- Misc Fine Column -->
+        <ng-container matColumnDef="miscFine">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Misc Fine</th>
+          <td mat-cell *matCellDef="let transaction" class="amount-cell">
+            ₹{{ transaction.miscFine | number:'1.0-0' }}
+          </td>
+        </ng-container>
+
+        <!-- Total Amount Column -->
+        <ng-container matColumnDef="totalAmount">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Amount</th>
+          <td mat-cell *matCellDef="let transaction" class="amount-cell total-amount">
+            ₹{{ transaction.totalAmount | number:'1.0-0' }}
+          </td>
+        </ng-container>
+
+        <!-- Amount Paid Column -->
+        <ng-container matColumnDef="amountPaid">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount Paid</th>
+          <td mat-cell *matCellDef="let transaction" class="amount-cell paid-amount">
+            ₹{{ transaction.amountPaid | number:'1.0-0' }}
+          </td>
+        </ng-container>
+
+        <!-- Pending Amount Column -->
+        <ng-container matColumnDef="pendingAmount">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Pending Amount</th>
+          <td mat-cell *matCellDef="let transaction" class="amount-cell" [class.pending-amount]="transaction.pendingAmount > 0">
+            ₹{{ transaction.pendingAmount | number:'1.0-0' }}
+          </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <td mat-cell *matCellDef="let transaction">{{ formatDate(transaction.date) }}</td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let transaction">
+            <button mat-icon-button color="primary" (click)="openTransactionForm(transaction)" matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteTransaction(transaction)" matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <!-- No Data Row -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="no-data">
+              <mat-icon>info</mat-icon>
+              <p>No transactions found</p>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+</div>
