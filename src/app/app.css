@@ -44,6 +44,47 @@
   margin-right: 8px;
 }
 
+/* User Menu */
+.user-menu {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.user-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  max-width: 250px;
+}
+
+.user-name {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.user-email {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Mobile Sidenav */
 .app-sidenav-container {
   height: calc(100vh - 64px);
@@ -67,6 +108,42 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 500;
+}
+
+.sidenav-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.sidenav-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sidenav-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidenav-user-name {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidenav-user-email {
+  font-size: 12px;
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mobile-nav {
@@ -98,6 +175,26 @@
 
 .mobile-nav a.active-link mat-icon {
   color: #1976d2;
+}
+
+.mobile-nav .signout-btn {
+  margin-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  margin: 16px 0 4px 0;
+  border-radius: 4px;
+  text-align: left;
+  justify-content: flex-start;
+  width: 100%;
+  color: #d32f2f;
+}
+
+.mobile-nav .signout-btn mat-icon {
+  color: #d32f2f;
 }
 
 /* Responsive Design */
