@@ -33,7 +33,7 @@ import { filter, take, switchMap } from 'rxjs/operators';
   styleUrl: './app.css'
 })
 export class App implements OnInit {
-  title = '।। श्री साईबाबा प्रसन्न ।। साई समर्थ सेवा मंडळ (सलपेवाडी) मुंबई';
+  title = 'साई समर्थ सेवा मंडळ';
   isSidenavOpen = false;
   user$: Observable<User | null>;
   availableLanguages: Language[];

@@ -131,7 +131,7 @@ mat-card-header {
 /* Card Content */
 mat-card-content {
   flex: 1;
-  padding: 20px !important;
+  padding: 5px !important;
 }
 
 /* Stats Grid */
