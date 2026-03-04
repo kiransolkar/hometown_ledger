@@ -1,6 +1,6 @@
 {
   "APP": {
-    "TITLE": "Salpewadi Community"
+    "TITLE": "साई समर्थ सेवा मंडळ (सलपेवाडी) मुंबई"
   },
   "NAV": {
     "DASHBOARD": "Dashboard",
@@ -27,8 +27,8 @@
     "ERROR": "Failed to sign in. Please try again."
   },
   "DASHBOARD": {
-    "TITLE": "Salpewadi Community Overview",
-    "SUBTITLE": "Welcome back! Here's what's happening in Salpewadi",
+    "TITLE": "साई समर्थ सेवा मंडळ (सलपेवाडी) मुंबई",
+    "SUBTITLE": "।। श्री साईबाबा प्रसन्न ।।",
     "USER_DETAILS": "User Details",
     "TOTAL": "Total",
     "TOTAL_MEMBERS": "Total Members",

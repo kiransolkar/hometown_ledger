@@ -486,3 +486,51 @@ mat-card-actions {
     height: 18px;
   }
 }
+
+/* Office Bearers Card */
+.quick-stat-card.office-bearers {
+  grid-column: span 2;
+}
+
+.quick-stat-card.office-bearers .quick-stat-content {
+  width: 100%;
+}
+
+.quick-stat-card.office-bearers .quick-stat-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 12px;
+}
+
+.office-bearer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bearer-item {
+  font-size: 0.9rem;
+  color: #4a5568;
+  padding: 6px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.bearer-item:last-child {
+  border-bottom: none;
+}
+
+.bearer-item strong {
+  color: #2d3748;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .quick-stat-card.office-bearers {
+    grid-column: span 1;
+  }
+
+  .bearer-item {
+    font-size: 0.85rem;
+  }
+}
