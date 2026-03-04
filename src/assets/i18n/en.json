@@ -1,0 +1,102 @@
+{
+  "APP": {
+    "TITLE": "Salpewadi Community"
+  },
+  "NAV": {
+    "DASHBOARD": "Dashboard",
+    "MEMBERS": "Members",
+    "TRANSACTIONS": "Transactions",
+    "NEWS": "News",
+    "ADMIN_CONFIG": "Admin Config"
+  },
+  "USER": {
+    "SIGN_OUT": "Sign Out",
+    "PROFILE": "Profile"
+  },
+  "LANGUAGE": {
+    "SELECT": "Language",
+    "ENGLISH": "English",
+    "MARATHI": "Marathi"
+  },
+  "LOGIN": {
+    "TITLE": "Member Dashboard",
+    "SUBTITLE": "Sign in to manage your members and transactions",
+    "WELCOME": "Welcome! Please sign in with your Google account to continue.",
+    "SIGN_IN": "Sign in with Google",
+    "SIGNING_IN": "Signing in...",
+    "ERROR": "Failed to sign in. Please try again."
+  },
+  "DASHBOARD": {
+    "TITLE": "Salpewadi Community Overview",
+    "SUBTITLE": "Welcome back! Here's what's happening in Salpewadi",
+    "USER_DETAILS": "User Details",
+    "TOTAL": "Total",
+    "TOTAL_MEMBERS": "Total Members",
+    "MUMBAI": "Mumbai",
+    "SALPEWADI": "Salpewadi",
+    "MANAGE_INFO": "Manage member information, view profiles, and update member details",
+    "VIEW_ALL_MEMBERS": "View All Members",
+    "TRANSACTIONS": "Transactions",
+    "TOTAL_TRANSACTIONS": "Total Transactions",
+    "TRANSACTION_TYPES": "Transaction Types",
+    "ANNUAL_FEES": "Annual Fees",
+    "MEETING_FINES": "Meeting Fines",
+    "MISC_FINES": "Misc. Fines",
+    "TRACK_INFO": "Track all types of fees and fines for community members",
+    "VIEW_ALL_TRANSACTIONS": "View All Transactions",
+    "ACTIVE_MEMBERS": "Active Members",
+    "RECENT_ACTIVITY": "Recent Activity",
+    "COMMUNITIES": "Communities",
+    "REPORTS": "Reports"
+  },
+  "NEWS": {
+    "MANAGEMENT": "News Management",
+    "ADD_NEWS": "Add News",
+    "EDIT_NEWS": "Edit News",
+    "TITLE": "Title",
+    "DESCRIPTION": "Description",
+    "DATE": "Date",
+    "STATUS": "Status",
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "SEARCH": "Search News",
+    "SEARCH_PLACEHOLDER": "Search by title or description...",
+    "NO_DATA": "No news items found",
+    "LATEST_NEWS": "Latest News & Events",
+    "DETAILS": "News Details",
+    "CREATED_BY": "Created By",
+    "CREATED_AT": "Created At",
+    "TITLE_REQUIRED": "Title is required",
+    "DESCRIPTION_REQUIRED": "Description is required",
+    "DATE_REQUIRED": "Date is required"
+  },
+  "ADMIN": {
+    "CONFIG_TITLE": "Admin Configuration",
+    "CONFIG_SUBTITLE": "Manage administrator access and permissions",
+    "ADMIN_EMAILS": "Administrator Emails",
+    "EMAIL_DESCRIPTION": "Only users with these email addresses can access admin features",
+    "NEW_EMAIL": "New Email Address",
+    "ADD_EMAIL": "Add Email",
+    "CURRENT_ADMINS": "Current Administrators",
+    "NO_ADMINS": "No administrators configured",
+    "YOU": "You",
+    "LAST_UPDATED": "Last Updated",
+    "UPDATED_BY": "Updated By",
+    "WARNING_TITLE": "Important Notice",
+    "WARNING_MESSAGE": "Removing all admins or removing yourself will lock you out of admin features. Proceed with caution."
+  },
+  "COMMON": {
+    "ACTIONS": "Actions",
+    "CLEAR": "Clear",
+    "MENU": "Menu",
+    "CLOSE": "Close",
+    "SAVE": "Save",
+    "CANCEL": "Cancel",
+    "DELETE": "Delete",
+    "EDIT": "Edit",
+    "ADD": "Add",
+    "SEARCH": "Search",
+    "LOADING": "Loading...",
+    "NO_DATA": "No data available"
+  }
+}

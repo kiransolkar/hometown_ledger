@@ -1,0 +1,115 @@
+<div class="news-form-container">
+  <div class="container py-4">
+    <div class="header-section mb-4">
+      <button mat-icon-button (click)="onCancel()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h2>{{ isNewNews ? ('NEWS.ADD_NEWS' | translate) : ('NEWS.EDIT_NEWS' | translate) }}</h2>
+    </div>
+
+    <mat-card class="form-card">
+      <mat-card-content>
+        <form [formGroup]="newsForm" (ngSubmit)="onSubmit()">
+          <div class="row g-3">
+            <!-- Title -->
+            <div class="col-12">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label>{{ 'NEWS.TITLE' | translate }}</mat-label>
+                <input matInput formControlName="title" required>
+                <mat-error *ngIf="newsForm.get('title')?.hasError('required')">
+                  {{ 'NEWS.TITLE_REQUIRED' | translate }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Description -->
+            <div class="col-12">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label>{{ 'NEWS.DESCRIPTION' | translate }}</mat-label>
+                <textarea matInput formControlName="description" rows="6" required></textarea>
+                <mat-error *ngIf="newsForm.get('description')?.hasError('required')">
+                  {{ 'NEWS.DESCRIPTION_REQUIRED' | translate }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Date -->
+            <div class="col-12 col-md-6">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label>{{ 'NEWS.DATE' | translate }}</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="date" required>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error *ngIf="newsForm.get('date')?.hasError('required')">
+                  {{ 'NEWS.DATE_REQUIRED' | translate }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Active Status -->
+            <div class="col-12 col-md-6">
+              <mat-checkbox formControlName="isActive" class="active-checkbox">
+                {{ 'NEWS.ACTIVE' | translate }}
+              </mat-checkbox>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="col-12">
+              <div class="form-actions">
+                <div class="left-actions">
+                  @if (!isNewNews && isEditMode) {
+                    <button mat-raised-button color="warn" type="button" (click)="onDelete()">
+                      <mat-icon>delete</mat-icon>
+                      {{ 'COMMON.DELETE' | translate }}
+                    </button>
+                  }
+                </div>
+
+                <div class="right-actions">
+                  <button mat-button type="button" (click)="onCancel()">
+                    {{ 'COMMON.CANCEL' | translate }}
+                  </button>
+
+                  @if (!isNewNews && !isEditMode) {
+                    <button mat-raised-button color="primary" type="button" (click)="toggleEditMode()">
+                      <mat-icon>edit</mat-icon>
+                      {{ 'COMMON.EDIT' | translate }}
+                    </button>
+                  }
+
+                  @if (isEditMode) {
+                    <button mat-raised-button color="primary" type="submit" [disabled]="!newsForm.valid">
+                      <mat-icon>save</mat-icon>
+                      {{ 'COMMON.SAVE' | translate }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- News Details (View Mode) -->
+    @if (!isEditMode && news) {
+      <mat-card class="details-card mt-3">
+        <mat-card-header>
+          <mat-card-title>{{ 'NEWS.DETAILS' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="details-grid">
+            <div class="detail-item">
+              <label>{{ 'NEWS.CREATED_BY' | translate }}:</label>
+              <span>{{ news.createdBy }}</span>
+            </div>
+            <div class="detail-item">
+              <label>{{ 'NEWS.CREATED_AT' | translate }}:</label>
+              <span>{{ news.createdAt | date: 'MMM dd, yyyy HH:mm' }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</div>

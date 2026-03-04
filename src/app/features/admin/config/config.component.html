@@ -1,0 +1,100 @@
+<div class="config-container">
+  <div class="container py-4">
+    <div class="header-section mb-4">
+      <h2>{{ 'ADMIN.CONFIG_TITLE' | translate }}</h2>
+      <p class="subtitle">{{ 'ADMIN.CONFIG_SUBTITLE' | translate }}</p>
+    </div>
+
+    <mat-card class="config-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'ADMIN.ADMIN_EMAILS' | translate }}</mat-card-title>
+        <mat-card-subtitle>{{ 'ADMIN.EMAIL_DESCRIPTION' | translate }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Add Email Section -->
+        <div class="add-email-section mb-4">
+          <mat-form-field class="email-input" appearance="outline">
+            <mat-label>{{ 'ADMIN.NEW_EMAIL' | translate }}</mat-label>
+            <input matInput [(ngModel)]="newEmail" (keyup.enter)="addEmail()" placeholder="example@gmail.com">
+            <mat-icon matPrefix>email</mat-icon>
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="addEmail()">
+            <mat-icon>add</mat-icon>
+            {{ 'ADMIN.ADD_EMAIL' | translate }}
+          </button>
+        </div>
+
+        <!-- Email List -->
+        <div class="email-list">
+          <h3>{{ 'ADMIN.CURRENT_ADMINS' | translate }} ({{ adminEmails.length }})</h3>
+
+          @if (adminEmails.length === 0) {
+            <p class="no-emails">{{ 'ADMIN.NO_ADMINS' | translate }}</p>
+          } @else {
+            <mat-list>
+              @for (email of adminEmails; track email) {
+                <mat-list-item>
+                  <div class="email-item">
+                    <div class="email-info">
+                      <mat-icon matListItemIcon>person</mat-icon>
+                      <span class="email-text">{{ email }}</span>
+                      @if (email === currentUserEmail) {
+                        <mat-chip class="current-user-chip">{{ 'ADMIN.YOU' | translate }}</mat-chip>
+                      }
+                    </div>
+                    @if (!isProtectedEmail(email)) {
+                      <button mat-icon-button color="warn" (click)="removeEmail(email)"
+                              matTooltip="{{ 'COMMON.DELETE' | translate }}">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                  </div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+              }
+            </mat-list>
+          }
+        </div>
+
+        <!-- Config Info -->
+        @if (adminConfig) {
+          <div class="config-info mt-4">
+            <p class="info-text">
+              <mat-icon>info</mat-icon>
+              {{ 'ADMIN.LAST_UPDATED' | translate }}: {{ adminConfig.lastUpdated | date: 'MMM dd, yyyy HH:mm' }}
+            </p>
+            <p class="info-text">
+              <mat-icon>person</mat-icon>
+              {{ 'ADMIN.UPDATED_BY' | translate }}: {{ adminConfig.updatedBy }}
+            </p>
+          </div>
+        }
+
+        <!-- Action Buttons -->
+        <div class="action-buttons mt-4">
+          <button mat-button (click)="cancelChanges()" [disabled]="!hasChanges()">
+            {{ 'COMMON.CANCEL' | translate }}
+          </button>
+          <button mat-raised-button color="primary" (click)="saveChanges()" [disabled]="!hasChanges()">
+            <mat-icon>save</mat-icon>
+            {{ 'COMMON.SAVE' | translate }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Warning Card -->
+    <mat-card class="warning-card mt-3">
+      <mat-card-content>
+        <div class="warning-content">
+          <mat-icon color="warn">warning</mat-icon>
+          <div>
+            <h4>{{ 'ADMIN.WARNING_TITLE' | translate }}</h4>
+            <p>{{ 'ADMIN.WARNING_MESSAGE' | translate }}</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

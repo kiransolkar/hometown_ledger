@@ -44,11 +44,24 @@
   margin-right: 8px;
 }
 
+/* Language Button */
+.language-button {
+  margin-right: 8px;
+}
+
+.language-button {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.language-button mat-icon {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
 /* User Menu */
 .user-menu {
   display: flex;
   align-items: center;
-  margin-left: 16px;
+  margin-left: 8px;
 }
 
 .user-button {
@@ -197,9 +210,33 @@
   color: #d32f2f;
 }
 
+.mobile-language-selector {
+  margin: 8px 0;
+  padding: 0 8px;
+}
+
+.language-selector-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 4px;
+  text-align: left;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.language-selector-btn mat-icon {
+  color: #666;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .desktop-nav {
+    display: none;
+  }
+
+  .language-button {
     display: none;
   }
 
