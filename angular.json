@@ -99,7 +99,11 @@
           "defaultConfiguration": "development"
         },
         "deploy": {
-          "builder": "angular-cli-ghpages:deploy"
+          "builder": "angular-cli-ghpages:deploy",
+          "options": {
+            "dir": "dist/MemberDashboard/browser",
+            "baseHref": "/hometown_ledger/"
+          }
         }
       }
     }
