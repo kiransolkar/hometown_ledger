@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "ng build --output-path dist --base-href /hometown_ledger/ && ng deploy --base-href=/hometown_ledger/"
   },
   "private": true,
   "packageManager": "npm@11.9.0",
