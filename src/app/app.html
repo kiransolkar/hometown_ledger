@@ -11,17 +11,44 @@
     <nav class="desktop-nav">
       <a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
         <mat-icon>dashboard</mat-icon>
-        <span>Dashboard</span>
+        <span>{{ 'NAV.DASHBOARD' | translate }}</span>
       </a>
       <a mat-button routerLink="/members" routerLinkActive="active-link">
         <mat-icon>people</mat-icon>
-        <span>Members</span>
+        <span>{{ 'NAV.MEMBERS' | translate }}</span>
       </a>
       <a mat-button routerLink="/transactions" routerLinkActive="active-link">
         <mat-icon>receipt_long</mat-icon>
-        <span>Transactions</span>
+        <span>{{ 'NAV.TRANSACTIONS' | translate }}</span>
       </a>
+
+      <!-- Admin Menu Items -->
+      @if (isAdmin$ | async) {
+        <a mat-button routerLink="/news" routerLinkActive="active-link">
+          <mat-icon>newspaper</mat-icon>
+          <span>{{ 'NAV.NEWS' | translate }}</span>
+        </a>
+        <a mat-button routerLink="/admin/config" routerLinkActive="active-link">
+          <mat-icon>settings</mat-icon>
+          <span>{{ 'NAV.ADMIN_CONFIG' | translate }}</span>
+        </a>
+      }
     </nav>
+
+    <!-- Language Selector -->
+    <button mat-icon-button [matMenuTriggerFor]="languageMenu" class="language-button">
+      <mat-icon>language</mat-icon>
+    </button>
+    <mat-menu #languageMenu="matMenu">
+      @for (lang of availableLanguages; track lang.code) {
+        <button mat-menu-item (click)="changeLanguage(lang.code)">
+          <span>{{ lang.nativeName }}</span>
+          @if ((currentLanguage$ | async) === lang.code) {
+            <mat-icon>check</mat-icon>
+          }
+        </button>
+      }
+    </mat-menu>
 
     <div class="user-menu">
       <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-button">
@@ -38,7 +65,7 @@
         </div>
         <button mat-menu-item (click)="signOut()">
           <mat-icon>logout</mat-icon>
-          <span>Sign Out</span>
+          <span>{{ 'USER.SIGN_OUT' | translate }}</span>
         </button>
       </mat-menu>
     </div>
@@ -65,21 +92,54 @@
       <nav class="mobile-nav">
         <a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="toggleSidenav()">
           <mat-icon>dashboard</mat-icon>
-          <span>Dashboard</span>
+          <span>{{ 'NAV.DASHBOARD' | translate }}</span>
         </a>
         <a mat-button routerLink="/members" routerLinkActive="active-link" (click)="toggleSidenav()">
           <mat-icon>people</mat-icon>
-          <span>Members</span>
+          <span>{{ 'NAV.MEMBERS' | translate }}</span>
         </a>
         <a mat-button routerLink="/transactions" routerLinkActive="active-link" (click)="toggleSidenav()">
           <mat-icon>receipt_long</mat-icon>
-          <span>Transactions</span>
+          <span>{{ 'NAV.TRANSACTIONS' | translate }}</span>
         </a>
+
+        <!-- Admin Menu Items (Mobile) -->
+        @if (isAdmin$ | async) {
+          <a mat-button routerLink="/news" routerLinkActive="active-link" (click)="toggleSidenav()">
+            <mat-icon>newspaper</mat-icon>
+            <span>{{ 'NAV.NEWS' | translate }}</span>
+          </a>
+          <a mat-button routerLink="/admin/config" routerLinkActive="active-link" (click)="toggleSidenav()">
+            <mat-icon>settings</mat-icon>
+            <span>{{ 'NAV.ADMIN_CONFIG' | translate }}</span>
+          </a>
+        }
+
+        <!-- Language selector in mobile menu -->
+        <div class="mobile-language-selector">
+          <button mat-button [matMenuTriggerFor]="mobileLangMenu" class="language-selector-btn">
+            <mat-icon>language</mat-icon>
+            <span>{{ getCurrentLanguageName() }}</span>
+          </button>
+        </div>
+
         <button mat-button class="signout-btn" (click)="signOut()">
           <mat-icon>logout</mat-icon>
-          <span>Sign Out</span>
+          <span>{{ 'USER.SIGN_OUT' | translate }}</span>
         </button>
       </nav>
+
+      <!-- Mobile language menu -->
+      <mat-menu #mobileLangMenu="matMenu">
+        @for (lang of availableLanguages; track lang.code) {
+          <button mat-menu-item (click)="changeLanguage(lang.code)">
+            <span>{{ lang.nativeName }}</span>
+            @if ((currentLanguage$ | async) === lang.code) {
+              <mat-icon>check</mat-icon>
+            }
+          </button>
+        }
+      </mat-menu>
     </mat-sidenav>
 
     <mat-sidenav-content>

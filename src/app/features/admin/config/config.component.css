@@ -1,0 +1,153 @@
+.config-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.header-section h2 {
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.subtitle {
+  color: #666;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.config-card {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.add-email-section {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.email-input {
+  flex: 1;
+}
+
+.email-list h3 {
+  margin: 0 0 1rem 0;
+  color: #666;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.no-emails {
+  color: #999;
+  text-align: center;
+  padding: 2rem;
+}
+
+.email-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 0;
+}
+
+.email-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.email-text {
+  font-size: 1rem;
+  color: #333;
+}
+
+.current-user-chip {
+  background-color: #3f51b5 !important;
+  color: white !important;
+  font-size: 0.75rem;
+}
+
+.config-info {
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.info-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.info-text mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 1rem;
+}
+
+.warning-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #fff3e0;
+  border-left: 4px solid #ff9800;
+}
+
+.warning-content {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.warning-content mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.warning-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: #e65100;
+}
+
+.warning-content p {
+  margin: 0;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .add-email-section {
+    flex-direction: column;
+  }
+
+  .add-email-section button {
+    width: 100%;
+  }
+
+  .email-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+}

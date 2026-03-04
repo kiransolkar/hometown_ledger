@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -35,6 +36,24 @@ export const routes: Routes = [
     loadComponent: () => import('./features/transactions/transaction-list/transaction-list.component')
       .then(m => m.TransactionListComponent),
     canActivate: [authGuard]
+  },
+  {
+    path: 'news',
+    loadComponent: () => import('./features/news/news-list/news-list.component')
+      .then(m => m.NewsListComponent),
+    canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'news/:id',
+    loadComponent: () => import('./features/news/news-form/news-form.component')
+      .then(m => m.NewsFormComponent),
+    canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'admin/config',
+    loadComponent: () => import('./features/admin/config/config.component')
+      .then(m => m.ConfigComponent),
+    canActivate: [authGuard, adminGuard]
   },
   {
     path: '**',

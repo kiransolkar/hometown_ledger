@@ -3,10 +3,46 @@
     <div class="dashboard-header">
       <h2 class="dashboard-title">
         <span class="title-icon">📊</span>
-        Dashboard Overview
+        {{ 'DASHBOARD.TITLE' | translate }}
       </h2>
-      <p class="dashboard-subtitle">Welcome back! Here's what's happening with your community</p>
+      <p class="dashboard-subtitle">{{ 'DASHBOARD.SUBTITLE' | translate }}</p>
     </div>
+
+    <!-- News Section -->
+    @if (newsList.length > 0) {
+      <div class="row g-4 mb-4">
+        <div class="col-12">
+          <mat-card class="dashboard-card news-card h-100">
+            <div class="card-background-pattern"></div>
+            <mat-card-header>
+              <!-- <div class="card-icon-wrapper news-icon">
+                <mat-icon class="card-icon">newspaper</mat-icon>
+              </div> -->
+              <mat-card-title class="card-title-text">
+                {{ 'NEWS.LATEST_NEWS' | translate }}
+                <!-- <span class="card-badge">{{ newsList.length }} {{ 'DASHBOARD.TOTAL' | translate }}</span> -->
+              </mat-card-title>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="news-list">
+                @for (news of newsList.slice(0, 3); track news.newsId) {
+                  <div class="news-item">
+                    <!-- <div class="news-item-icon">
+                      <mat-icon>event</mat-icon>
+                    </div> -->
+                    <div class="news-item-content">
+                      <div class="news-item-title">{{ news.title }}</div>
+                      <div class="news-item-date">{{ news.date | date: 'MMM dd, yyyy' }}</div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    }
 
     <div class="row g-4">
       <!-- User Details Card -->
@@ -46,11 +82,6 @@
                   <div class="stat-label">Salpewadi</div>
                 </div>
               </div>
-            </div>
-
-            <div class="card-footer-info">
-              <mat-icon>info</mat-icon>
-              <span>Manage member information, view profiles, and update member details</span>
             </div>
           </mat-card-content>
 
@@ -93,17 +124,6 @@
                   <div class="stat-label">Transaction Types</div>
                 </div>
               </div>
-            </div>
-
-            <div class="transaction-types">
-              <div class="transaction-type-badge annual">Annual Fees</div>
-              <div class="transaction-type-badge meeting">Meeting Fines</div>
-              <div class="transaction-type-badge misc">Misc. Fines</div>
-            </div>
-
-            <div class="card-footer-info">
-              <mat-icon>info</mat-icon>
-              <span>Track all types of fees and fines for community members</span>
             </div>
           </mat-card-content>
 
