@@ -1,0 +1,36 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="login-title">
+          <mat-icon class="title-icon">people</mat-icon>
+          <h1>Member Dashboard</h1>
+        </div>
+      </mat-card-title>
+      <mat-card-subtitle>Sign in to manage your members and transactions</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="login-content">
+        <p class="welcome-text">Welcome! Please sign in with your Google account to continue.</p>
+
+        @if (errorMessage) {
+          <div class="error-message">
+            <mat-icon>error</mat-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+        }
+
+        <button
+          mat-raised-button
+          color="primary"
+          class="google-signin-button"
+          (click)="signInWithGoogle()"
+          [disabled]="isLoading">
+          <mat-icon>{{isLoading ? 'hourglass_empty' : 'login'}}</mat-icon>
+          {{ isLoading ? 'Signing in...' : 'Sign in with Google' }}
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

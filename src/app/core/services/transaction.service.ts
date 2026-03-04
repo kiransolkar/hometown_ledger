@@ -1,5 +1,17 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map, combineLatest } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, combineLatest, map } from 'rxjs';
+import {
+  Firestore,
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  Timestamp,
+  query,
+  where
+} from '@angular/fire/firestore';
 import { Transaction, calculateMeetingFine, calculateTotalAmount, calculatePendingAmount } from '../../shared/models/transaction.model';
 import { MemberService } from './member.service';
 
@@ -7,12 +19,218 @@ import { MemberService } from './member.service';
   providedIn: 'root'
 })
 export class TransactionService {
-  private transactionsSubject = new BehaviorSubject<Transaction[]>(this.generateMockTransactions());
-  public transactions$ = this.transactionsSubject.asObservable();
+  private firestore: Firestore = inject(Firestore);
+  private transactionsCollection = collection(this.firestore, 'transactions');
+  private migrationKey = 'transactions_migrated';
 
-  private nextId = 16;
+  constructor(private memberService: MemberService) {
+    this.checkAndMigrate();
+  }
 
-  constructor(private memberService: MemberService) {}
+  private async checkAndMigrate(): Promise<void> {
+    const migrated = localStorage.getItem(this.migrationKey);
+    if (!migrated) {
+      await this.migrateInitialData();
+      localStorage.setItem(this.migrationKey, 'true');
+    }
+  }
+
+  private async migrateInitialData(): Promise<void> {
+    const mockData = this.generateMockTransactions();
+
+    try {
+      const querySnapshot = await getDocs(this.transactionsCollection);
+
+      // Only migrate if collection is empty
+      if (querySnapshot.empty) {
+        console.log('Migrating initial transaction data to Firestore...');
+
+        for (const transaction of mockData) {
+          const firestoreTransaction = {
+            ...transaction,
+            date: Timestamp.fromDate(transaction.date)
+          };
+          await addDoc(this.transactionsCollection, firestoreTransaction);
+        }
+
+        console.log('Transaction migration complete!');
+      }
+    } catch (error) {
+      console.error('Error during transaction migration:', error);
+    }
+  }
+
+  getTransactions(): Observable<Transaction[]> {
+    return new Observable<Transaction[]>(subscriber => {
+      getDocs(this.transactionsCollection)
+        .then(snapshot => {
+          const transactions: Transaction[] = snapshot.docs
+            .map(doc => {
+              const data = doc.data() as any;
+              return {
+                transactionId: data.transactionId,
+                memberId: data.memberId,
+                year: data.year,
+                annualFee: data.annualFee,
+                meetingFine: data.meetingFine,
+                miscFine: data.miscFine,
+                amountPaid: data.amountPaid,
+                totalAmount: data.totalAmount,
+                pendingAmount: data.pendingAmount,
+                meetingsAttended: data.meetingsAttended,
+                date: data.date?.toDate ? data.date.toDate() : data.date,
+                notes: data.notes
+              };
+            })
+            .filter(transaction => transaction.transactionId && transaction.memberId && transaction.year);
+          subscriber.next(transactions);
+          subscriber.complete();
+        })
+        .catch(error => {
+          console.error('Error fetching transactions:', error);
+          subscriber.next([]);
+          subscriber.complete();
+        });
+    });
+  }
+
+  getTransactionById(id: number): Observable<Transaction | undefined> {
+    return this.getTransactions().pipe(
+      map(transactions => transactions.find(t => t.transactionId === id))
+    );
+  }
+
+  getTransactionsByMemberId(memberId: number): Observable<Transaction[]> {
+    return this.getTransactions().pipe(
+      map(transactions => transactions.filter(t => t.memberId === memberId))
+    );
+  }
+
+  filterTransactions(
+    year?: number,
+    memberId?: number
+  ): Observable<Transaction[]> {
+    return this.getTransactions().pipe(
+      map(transactions => {
+        let filtered = transactions;
+
+        if (year) {
+          filtered = filtered.filter(t => t.year === year);
+        }
+
+        if (memberId) {
+          filtered = filtered.filter(t => t.memberId === memberId);
+        }
+
+        return filtered;
+      })
+    );
+  }
+
+  async addTransaction(transactionData: Omit<Transaction, 'transactionId' | 'totalAmount' | 'pendingAmount'>): Promise<void> {
+    try {
+      // Get the highest transactionId to generate next ID
+      const transactions = await getDocs(this.transactionsCollection);
+      let maxId = 0;
+      transactions.forEach(doc => {
+        const data = doc.data();
+        if (data['transactionId'] > maxId) {
+          maxId = data['transactionId'];
+        }
+      });
+
+      // Auto-calculate Meeting Fine if meetingsAttended is provided
+      let meetingFine = transactionData.meetingFine;
+      if (transactionData.meetingsAttended !== undefined) {
+        meetingFine = calculateMeetingFine(transactionData.meetingsAttended);
+      }
+
+      // Calculate totalAmount and pendingAmount
+      const totalAmount = calculateTotalAmount(transactionData.annualFee, meetingFine, transactionData.miscFine);
+      const pendingAmount = calculatePendingAmount(totalAmount, transactionData.amountPaid);
+
+      const newTransaction = {
+        ...transactionData,
+        transactionId: maxId + 1,
+        meetingFine,
+        totalAmount,
+        pendingAmount,
+        date: Timestamp.fromDate(transactionData.date)
+      };
+
+      await addDoc(this.transactionsCollection, newTransaction);
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      throw error;
+    }
+  }
+
+  async updateTransaction(id: number, transactionData: Omit<Transaction, 'transactionId' | 'totalAmount' | 'pendingAmount'>): Promise<void> {
+    try {
+      // Find document with matching transactionId
+      const q = query(this.transactionsCollection, where('transactionId', '==', id));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const docToUpdate = querySnapshot.docs[0];
+
+        // Auto-calculate Meeting Fine if meetingsAttended is provided
+        let meetingFine = transactionData.meetingFine;
+        if (transactionData.meetingsAttended !== undefined) {
+          meetingFine = calculateMeetingFine(transactionData.meetingsAttended);
+        }
+
+        // Calculate totalAmount and pendingAmount
+        const totalAmount = calculateTotalAmount(transactionData.annualFee, meetingFine, transactionData.miscFine);
+        const pendingAmount = calculatePendingAmount(totalAmount, transactionData.amountPaid);
+
+        const updatedData = {
+          ...transactionData,
+          meetingFine,
+          totalAmount,
+          pendingAmount,
+          date: Timestamp.fromDate(transactionData.date)
+        };
+
+        await updateDoc(doc(this.firestore, 'transactions', docToUpdate.id), updatedData);
+      }
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      throw error;
+    }
+  }
+
+  async deleteTransaction(id: number): Promise<void> {
+    try {
+      // Find document with matching transactionId
+      const q = query(this.transactionsCollection, where('transactionId', '==', id));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const docToDelete = querySnapshot.docs[0];
+        await deleteDoc(doc(this.firestore, 'transactions', docToDelete.id));
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      throw error;
+    }
+  }
+
+  // Helper method to get transactions with member details
+  getTransactionsWithMemberDetails(): Observable<any[]> {
+    return combineLatest([this.getTransactions(), this.memberService.getMembers()]).pipe(
+      map(([transactions, members]) => {
+        return transactions.map(transaction => {
+          const member = members.find(m => m.memberId === transaction.memberId);
+          return {
+            ...transaction,
+            memberName: member?.fullName || 'Unknown',
+            memberCommunity: member?.community || 'Unknown'
+          };
+        });
+      })
+    );
+  }
 
   private generateMockTransactions(): Transaction[] {
     return [
@@ -227,114 +445,5 @@ export class TransactionService {
         notes: 'Fully paid - Parking violation fine included'
       }
     ];
-  }
-
-  getTransactions(): Observable<Transaction[]> {
-    return this.transactions$;
-  }
-
-  getTransactionById(id: number): Observable<Transaction | undefined> {
-    return this.transactions$.pipe(
-      map(transactions => transactions.find(t => t.transactionId === id))
-    );
-  }
-
-  getTransactionsByMemberId(memberId: number): Observable<Transaction[]> {
-    return this.transactions$.pipe(
-      map(transactions => transactions.filter(t => t.memberId === memberId))
-    );
-  }
-
-  filterTransactions(
-    year?: number,
-    memberId?: number
-  ): Observable<Transaction[]> {
-    return this.transactions$.pipe(
-      map(transactions => {
-        let filtered = transactions;
-
-        if (year) {
-          filtered = filtered.filter(t => t.year === year);
-        }
-
-        if (memberId) {
-          filtered = filtered.filter(t => t.memberId === memberId);
-        }
-
-        return filtered;
-      })
-    );
-  }
-
-  addTransaction(transactionData: Omit<Transaction, 'transactionId' | 'totalAmount' | 'pendingAmount'>): void {
-    // Auto-calculate Meeting Fine if meetingsAttended is provided
-    let meetingFine = transactionData.meetingFine;
-    if (transactionData.meetingsAttended !== undefined) {
-      meetingFine = calculateMeetingFine(transactionData.meetingsAttended);
-    }
-
-    // Calculate totalAmount and pendingAmount
-    const totalAmount = calculateTotalAmount(transactionData.annualFee, meetingFine, transactionData.miscFine);
-    const pendingAmount = calculatePendingAmount(totalAmount, transactionData.amountPaid);
-
-    const newTransaction: Transaction = {
-      ...transactionData,
-      meetingFine,
-      totalAmount,
-      pendingAmount,
-      transactionId: this.nextId++
-    };
-
-    const currentTransactions = this.transactionsSubject.value;
-    this.transactionsSubject.next([...currentTransactions, newTransaction]);
-  }
-
-  updateTransaction(id: number, transactionData: Omit<Transaction, 'transactionId' | 'totalAmount' | 'pendingAmount'>): void {
-    const currentTransactions = this.transactionsSubject.value;
-    const index = currentTransactions.findIndex(t => t.transactionId === id);
-
-    if (index !== -1) {
-      // Auto-calculate Meeting Fine if meetingsAttended is provided
-      let meetingFine = transactionData.meetingFine;
-      if (transactionData.meetingsAttended !== undefined) {
-        meetingFine = calculateMeetingFine(transactionData.meetingsAttended);
-      }
-
-      // Calculate totalAmount and pendingAmount
-      const totalAmount = calculateTotalAmount(transactionData.annualFee, meetingFine, transactionData.miscFine);
-      const pendingAmount = calculatePendingAmount(totalAmount, transactionData.amountPaid);
-
-      const updatedTransaction: Transaction = {
-        ...transactionData,
-        meetingFine,
-        totalAmount,
-        pendingAmount,
-        transactionId: id
-      };
-
-      currentTransactions[index] = updatedTransaction;
-      this.transactionsSubject.next([...currentTransactions]);
-    }
-  }
-
-  deleteTransaction(id: number): void {
-    const currentTransactions = this.transactionsSubject.value;
-    this.transactionsSubject.next(currentTransactions.filter(t => t.transactionId !== id));
-  }
-
-  // Helper method to get transactions with member details
-  getTransactionsWithMemberDetails(): Observable<any[]> {
-    return combineLatest([this.transactions$, this.memberService.getMembers()]).pipe(
-      map(([transactions, members]) => {
-        return transactions.map(transaction => {
-          const member = members.find(m => m.memberId === transaction.memberId);
-          return {
-            ...transaction,
-            memberName: member?.fullName || 'Unknown',
-            memberCommunity: member?.community || 'Unknown'
-          };
-        });
-      })
-    );
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -27,7 +27,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private memberService: MemberService,
-    private transactionService: TransactionService
+    private transactionService: TransactionService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -35,10 +36,12 @@ export class DashboardComponent implements OnInit {
       this.totalMembers = members.length;
       this.mumbaiMembers = members.filter(m => m.community === 'Mumbai').length;
       this.salpewadiMembers = members.filter(m => m.community === 'Salpewadi').length;
+      this.cdr.detectChanges();
     });
 
     this.transactionService.getTransactions().subscribe(transactions => {
       this.totalTransactions = transactions.length;
+      this.cdr.detectChanges();
     });
   }
 }

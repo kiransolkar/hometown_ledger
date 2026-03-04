@@ -1,17 +1,219 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
+import {
+  Firestore,
+  collection,
+  collectionData,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDoc,
+  getDocs,
+  Timestamp,
+  query,
+  where,
+  DocumentData
+} from '@angular/fire/firestore';
 import { Member, createFullName } from '../../shared/models/member.model';
+
+interface FirestoreMember extends Omit<Member, 'dateOfBirth'> {
+  dateOfBirth: Timestamp;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class MemberService {
-  private membersSubject = new BehaviorSubject<Member[]>(this.generateMockMembers());
-  public members$ = this.membersSubject.asObservable();
+  private firestore: Firestore = inject(Firestore);
+  private membersCollection = collection(this.firestore, 'members');
+  private migrationKey = 'members_migrated';
 
-  private nextId = 44;
+  constructor() {
+    this.checkAndMigrate();
+  }
 
-  constructor() {}
+  private async checkAndMigrate(): Promise<void> {
+    const migrated = localStorage.getItem(this.migrationKey);
+    if (!migrated) {
+      await this.migrateInitialData();
+      localStorage.setItem(this.migrationKey, 'true');
+    }
+  }
+
+  private async migrateInitialData(): Promise<void> {
+    const mockData = this.generateMockMembers();
+
+    try {
+      const querySnapshot = await getDocs(this.membersCollection);
+
+      // Only migrate if collection is empty
+      if (querySnapshot.empty) {
+        console.log('Migrating initial member data to Firestore...');
+
+        for (const member of mockData) {
+          const firestoreMember = this.convertToFirestoreMember(member);
+          await addDoc(this.membersCollection, firestoreMember);
+        }
+
+        console.log('Migration complete!');
+      }
+    } catch (error) {
+      console.error('Error during migration:', error);
+    }
+  }
+
+  private convertToFirestoreMember(member: Member): any {
+    return {
+      memberId: member.memberId,
+      firstName: member.firstName,
+      middleName: member.middleName || null,
+      lastName: member.lastName,
+      fullName: member.fullName,
+      surnameGroup: member.surnameGroup || null,
+      dateOfBirth: Timestamp.fromDate(member.dateOfBirth),
+      address: member.address,
+      community: member.community,
+      phoneNumber: member.phoneNumber,
+      emailAddress: member.emailAddress
+    };
+  }
+
+  private convertFromFirestore(doc: any): Member {
+    const data = doc.data();
+    return {
+      ...data,
+      dateOfBirth: data.dateOfBirth.toDate(),
+      id: doc.id
+    } as Member;
+  }
+
+  getMembers(): Observable<Member[]> {
+    return new Observable<Member[]>(subscriber => {
+      getDocs(this.membersCollection)
+        .then(snapshot => {
+          const members: Member[] = snapshot.docs
+            .map(doc => {
+              const data = doc.data() as any;
+              return {
+                memberId: data.memberId,
+                firstName: data.firstName,
+                middleName: data.middleName,
+                lastName: data.lastName,
+                fullName: data.fullName,
+                surnameGroup: data.surnameGroup,
+                dateOfBirth: data.dateOfBirth?.toDate ? data.dateOfBirth.toDate() : data.dateOfBirth,
+                address: data.address,
+                community: data.community,
+                phoneNumber: data.phoneNumber,
+                emailAddress: data.emailAddress
+              };
+            })
+            .filter(member => member.memberId && member.firstName && member.lastName);
+          subscriber.next(members);
+          subscriber.complete();
+        })
+        .catch(error => {
+          console.error('Error fetching members:', error);
+          subscriber.next([]);
+          subscriber.complete();
+        });
+    });
+  }
+
+  getMemberById(id: number): Observable<Member | undefined> {
+    return this.getMembers().pipe(
+      map(members => members.find(m => m.memberId === id))
+    );
+  }
+
+  searchMembers(searchTerm: string): Observable<Member[]> {
+    return this.getMembers().pipe(
+      map(members => members.filter(m =>
+        m.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.emailAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.phoneNumber.includes(searchTerm) ||
+        m.community.toLowerCase().includes(searchTerm.toLowerCase())
+      ))
+    );
+  }
+
+  filterByCommunit(community: 'Mumbai' | 'Salpewadi' | ''): Observable<Member[]> {
+    if (!community) {
+      return this.getMembers();
+    }
+    return this.getMembers().pipe(
+      map(members => members.filter(m => m.community === community))
+    );
+  }
+
+  async addMember(memberData: Omit<Member, 'memberId' | 'fullName'>): Promise<void> {
+    try {
+      // Get the highest memberId to generate next ID
+      const members = await getDocs(this.membersCollection);
+      let maxId = 0;
+      members.forEach(doc => {
+        const data = doc.data();
+        if (data['memberId'] > maxId) {
+          maxId = data['memberId'];
+        }
+      });
+
+      const newMember = {
+        ...memberData,
+        memberId: maxId + 1,
+        fullName: createFullName(memberData.firstName, memberData.middleName, memberData.lastName),
+        dateOfBirth: Timestamp.fromDate(memberData.dateOfBirth),
+        middleName: memberData.middleName || null,
+        surnameGroup: memberData.surnameGroup || null
+      };
+
+      await addDoc(this.membersCollection, newMember);
+    } catch (error) {
+      console.error('Error adding member:', error);
+      throw error;
+    }
+  }
+
+  async updateMember(id: number, memberData: Omit<Member, 'memberId' | 'fullName'>): Promise<void> {
+    try {
+      // Find document with matching memberId
+      const q = query(this.membersCollection, where('memberId', '==', id));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const docToUpdate = querySnapshot.docs[0];
+        const updatedData = {
+          ...memberData,
+          fullName: createFullName(memberData.firstName, memberData.middleName, memberData.lastName),
+          dateOfBirth: Timestamp.fromDate(memberData.dateOfBirth),
+          middleName: memberData.middleName || null,
+          surnameGroup: memberData.surnameGroup || null
+        };
+
+        await updateDoc(doc(this.firestore, 'members', docToUpdate.id), updatedData);
+      }
+    } catch (error) {
+      console.error('Error updating member:', error);
+      throw error;
+    }
+  }
+
+  async deleteMember(id: number): Promise<void> {
+    try {
+      // Find document with matching memberId
+      const q = query(this.membersCollection, where('memberId', '==', id));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const docToDelete = querySnapshot.docs[0];
+        await deleteDoc(doc(this.firestore, 'members', docToDelete.id));
+      }
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      throw error;
+    }
+  }
 
   private generateMockMembers(): Member[] {
     return [
@@ -533,65 +735,5 @@ export class MemberService {
         emailAddress: 'dinkar.thik@email.com'
       }
     ];
-  }
-
-  getMembers(): Observable<Member[]> {
-    return this.members$;
-  }
-
-  getMemberById(id: number): Observable<Member | undefined> {
-    return this.members$.pipe(
-      map(members => members.find(m => m.memberId === id))
-    );
-  }
-
-  searchMembers(searchTerm: string): Observable<Member[]> {
-    return this.members$.pipe(
-      map(members => members.filter(m =>
-        m.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.emailAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.phoneNumber.includes(searchTerm) ||
-        m.community.toLowerCase().includes(searchTerm.toLowerCase())
-      ))
-    );
-  }
-
-  filterByCommunit(community: 'Mumbai' | 'Salpewadi' | ''): Observable<Member[]> {
-    if (!community) {
-      return this.members$;
-    }
-    return this.members$.pipe(
-      map(members => members.filter(m => m.community === community))
-    );
-  }
-
-  addMember(memberData: Omit<Member, 'memberId' | 'fullName'>): void {
-    const newMember: Member = {
-      ...memberData,
-      memberId: this.nextId++,
-      fullName: createFullName(memberData.firstName, memberData.middleName, memberData.lastName)
-    };
-    const currentMembers = this.membersSubject.value;
-    this.membersSubject.next([...currentMembers, newMember]);
-  }
-
-  updateMember(id: number, memberData: Omit<Member, 'memberId' | 'fullName'>): void {
-    const currentMembers = this.membersSubject.value;
-    const index = currentMembers.findIndex(m => m.memberId === id);
-
-    if (index !== -1) {
-      const updatedMember: Member = {
-        ...memberData,
-        memberId: id,
-        fullName: createFullName(memberData.firstName, memberData.middleName, memberData.lastName)
-      };
-      currentMembers[index] = updatedMember;
-      this.membersSubject.next([...currentMembers]);
-    }
-  }
-
-  deleteMember(id: number): void {
-    const currentMembers = this.membersSubject.value;
-    this.membersSubject.next(currentMembers.filter(m => m.memberId !== id));
   }
 }

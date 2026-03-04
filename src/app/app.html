@@ -1,55 +1,91 @@
-<mat-toolbar color="primary" class="app-toolbar">
-  <button mat-icon-button class="mobile-menu-btn" (click)="toggleSidenav()">
-    <mat-icon>menu</mat-icon>
-  </button>
+@if (user$ | async; as user) {
+  <mat-toolbar color="primary" class="app-toolbar">
+    <button mat-icon-button class="mobile-menu-btn" (click)="toggleSidenav()">
+      <mat-icon>menu</mat-icon>
+    </button>
 
-  <span class="app-title">{{ title }}</span>
+    <span class="app-title">{{ title }}</span>
 
-  <span class="spacer"></span>
+    <span class="spacer"></span>
 
-  <nav class="desktop-nav">
-    <a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
-      <mat-icon>dashboard</mat-icon>
-      <span>Dashboard</span>
-    </a>
-    <a mat-button routerLink="/members" routerLinkActive="active-link">
-      <mat-icon>people</mat-icon>
-      <span>Members</span>
-    </a>
-    <a mat-button routerLink="/transactions" routerLinkActive="active-link">
-      <mat-icon>receipt_long</mat-icon>
-      <span>Transactions</span>
-    </a>
-  </nav>
-</mat-toolbar>
-
-<!-- Mobile Sidenav -->
-<mat-sidenav-container class="app-sidenav-container">
-  <mat-sidenav #sidenav [opened]="isSidenavOpen" (closed)="isSidenavOpen = false" mode="over" class="mobile-sidenav">
-    <div class="sidenav-header">
-      <h2>{{ title }}</h2>
-      <button mat-icon-button (click)="toggleSidenav()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <nav class="mobile-nav">
-      <a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="toggleSidenav()">
+    <nav class="desktop-nav">
+      <a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
         <mat-icon>dashboard</mat-icon>
         <span>Dashboard</span>
       </a>
-      <a mat-button routerLink="/members" routerLinkActive="active-link" (click)="toggleSidenav()">
+      <a mat-button routerLink="/members" routerLinkActive="active-link">
         <mat-icon>people</mat-icon>
         <span>Members</span>
       </a>
-      <a mat-button routerLink="/transactions" routerLinkActive="active-link" (click)="toggleSidenav()">
+      <a mat-button routerLink="/transactions" routerLinkActive="active-link">
         <mat-icon>receipt_long</mat-icon>
         <span>Transactions</span>
       </a>
     </nav>
-  </mat-sidenav>
 
-  <mat-sidenav-content>
-    <router-outlet></router-outlet>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    <div class="user-menu">
+      <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-button">
+        @if (user.photoURL) {
+          <img [src]="user.photoURL" [alt]="user.displayName || 'User'" class="user-avatar">
+        } @else {
+          <mat-icon>account_circle</mat-icon>
+        }
+      </button>
+      <mat-menu #userMenu="matMenu">
+        <div class="user-info">
+          <div class="user-name">{{ user.displayName }}</div>
+          <div class="user-email">{{ user.email }}</div>
+        </div>
+        <button mat-menu-item (click)="signOut()">
+          <mat-icon>logout</mat-icon>
+          <span>Sign Out</span>
+        </button>
+      </mat-menu>
+    </div>
+  </mat-toolbar>
+
+  <!-- Mobile Sidenav -->
+  <mat-sidenav-container class="app-sidenav-container">
+    <mat-sidenav #sidenav [opened]="isSidenavOpen" (closed)="isSidenavOpen = false" mode="over" class="mobile-sidenav">
+      <div class="sidenav-header">
+        <div class="sidenav-user">
+          @if (user.photoURL) {
+            <img [src]="user.photoURL" [alt]="user.displayName || 'User'" class="sidenav-avatar">
+          }
+          <div class="sidenav-user-info">
+            <div class="sidenav-user-name">{{ user.displayName }}</div>
+            <div class="sidenav-user-email">{{ user.email }}</div>
+          </div>
+        </div>
+        <button mat-icon-button (click)="toggleSidenav()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <nav class="mobile-nav">
+        <a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="toggleSidenav()">
+          <mat-icon>dashboard</mat-icon>
+          <span>Dashboard</span>
+        </a>
+        <a mat-button routerLink="/members" routerLinkActive="active-link" (click)="toggleSidenav()">
+          <mat-icon>people</mat-icon>
+          <span>Members</span>
+        </a>
+        <a mat-button routerLink="/transactions" routerLinkActive="active-link" (click)="toggleSidenav()">
+          <mat-icon>receipt_long</mat-icon>
+          <span>Transactions</span>
+        </a>
+        <button mat-button class="signout-btn" (click)="signOut()">
+          <mat-icon>logout</mat-icon>
+          <span>Sign Out</span>
+        </button>
+      </nav>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+} @else {
+  <router-outlet></router-outlet>
+}
