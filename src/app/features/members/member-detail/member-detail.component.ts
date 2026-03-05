@@ -48,8 +48,6 @@ export class MemberDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.initializeForm();
-
     const id = this.route.snapshot.paramMap.get('id');
 
     if (id === 'new') {
@@ -57,6 +55,11 @@ export class MemberDetailComponent implements OnInit {
       this.isEditMode = true;
     } else if (id) {
       this.memberId = parseInt(id, 10);
+    }
+
+    this.initializeForm();
+
+    if (this.memberId) {
       this.loadMember();
     }
   }
@@ -111,28 +114,37 @@ export class MemberDetailComponent implements OnInit {
     }
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.memberForm.valid) {
       const formValue = this.memberForm.value;
 
-      if (this.isNewMember) {
-        this.memberService.addMember(formValue);
-        this.snackBar.open('Member added successfully!', 'Close', {
+      try {
+        if (this.isNewMember) {
+          await this.memberService.addMember(formValue);
+          this.snackBar.open('Member added successfully!', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
+          this.router.navigate(['/members']);
+        } else if (this.memberId) {
+          await this.memberService.updateMember(this.memberId, formValue);
+          this.snackBar.open('Member updated successfully!', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
+          this.isEditMode = false;
+          this.memberForm.disable();
+          this.loadMember();
+        }
+      } catch (error) {
+        this.snackBar.open('Error saving member. Please try again.', 'Close', {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
         });
-        this.router.navigate(['/members']);
-      } else if (this.memberId) {
-        this.memberService.updateMember(this.memberId, formValue);
-        this.snackBar.open('Member updated successfully!', 'Close', {
-          duration: 3000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top'
-        });
-        this.isEditMode = false;
-        this.memberForm.disable();
-        this.loadMember();
+        console.error('Error saving member:', error);
       }
     } else {
       this.snackBar.open('Please fill all required fields correctly', 'Close', {
@@ -147,15 +159,24 @@ export class MemberDetailComponent implements OnInit {
     this.router.navigate(['/members']);
   }
 
-  deleteMember(): void {
+  async deleteMember(): Promise<void> {
     if (this.memberId && confirm('Are you sure you want to delete this member?')) {
-      this.memberService.deleteMember(this.memberId);
-      this.snackBar.open('Member deleted successfully!', 'Close', {
-        duration: 3000,
-        horizontalPosition: 'end',
-        verticalPosition: 'top'
-      });
-      this.router.navigate(['/members']);
+      try {
+        await this.memberService.deleteMember(this.memberId);
+        this.snackBar.open('Member deleted successfully!', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+        this.router.navigate(['/members']);
+      } catch (error) {
+        this.snackBar.open('Error deleting member. Please try again.', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+        console.error('Error deleting member:', error);
+      }
     }
   }
 }

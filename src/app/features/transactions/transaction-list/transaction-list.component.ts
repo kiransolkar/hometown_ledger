@@ -78,7 +78,7 @@ export class TransactionListComponent implements OnInit {
 
   generateYears(): void {
     const currentYear = new Date().getFullYear();
-    for (let year = currentYear; year >= currentYear - 5; year--) {
+    for (let year = currentYear; year >= 2024; year--) {
       this.availableYears.push(year);
     }
   }
