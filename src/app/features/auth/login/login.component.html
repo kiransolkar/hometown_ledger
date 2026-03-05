@@ -12,7 +12,7 @@
 
     <mat-card-content>
       <div class="login-content">
-        <p class="welcome-text">Welcome! Please sign in with your Google account to continue.</p>
+        <p class="welcome-text">Welcome! Please sign in with your Google account or continue as a guest.</p>
 
         @if (errorMessage) {
           <div class="error-message">
@@ -30,6 +30,32 @@
           <mat-icon>{{isLoading ? 'hourglass_empty' : 'login'}}</mat-icon>
           {{ isLoading ? 'Signing in...' : 'Sign in with Google' }}
         </button>
+
+        <div class="divider">
+          <span>OR</span>
+        </div>
+
+        <div class="guest-login-section">
+          <mat-form-field appearance="outline" class="username-field">
+            <mat-label>Enter a username</mat-label>
+            <input
+              matInput
+              [(ngModel)]="guestUsername"
+              placeholder="Choose a username"
+              [disabled]="isLoading"
+              (keyup.enter)="signInAsGuest()">
+            <mat-icon matPrefix>person</mat-icon>
+          </mat-form-field>
+
+          <button
+            mat-raised-button
+            class="guest-signin-button"
+            (click)="signInAsGuest()"
+            [disabled]="isLoading || !guestUsername.trim()">
+            <mat-icon>person_add</mat-icon>
+            Continue as Guest
+          </button>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>

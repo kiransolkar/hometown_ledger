@@ -97,6 +97,51 @@ mat-card-subtitle {
   font-size: 14px;
 }
 
+.divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+  margin: 8px 0;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.divider span {
+  padding: 0 16px;
+}
+
+.guest-login-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.username-field {
+  width: 100%;
+}
+
+.guest-signin-button {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.guest-signin-button mat-icon {
+  margin-right: 8px;
+}
+
 @media (max-width: 600px) {
   .login-container {
     padding: 16px;
@@ -106,11 +151,10 @@ mat-card-subtitle {
     font-size: 24px;
   }
 
-  .google-signin-button {
-    max-width: 100%;
-  }
-
-  .error-message {
+  .google-signin-button,
+  .error-message,
+  .divider,
+  .guest-login-section {
     max-width: 100%;
   }
 }

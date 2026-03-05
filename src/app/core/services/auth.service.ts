@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Auth, signInWithPopup, GoogleAuthProvider, signOut, user, User as FirebaseUser } from '@angular/fire/auth';
+import { Auth, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut, user, User as FirebaseUser, updateProfile } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { Observable, map } from 'rxjs';
 import { User } from '../../shared/models/user.model';
@@ -40,6 +40,25 @@ export class AuthService {
       }
     } catch (error) {
       console.error('Error signing in with Google:', error);
+      throw error;
+    }
+  }
+
+  async signInAsGuest(username: string): Promise<void> {
+    try {
+      // Sign in anonymously with Firebase
+      const result = await signInAnonymously(this.auth);
+
+      if (result.user) {
+        // Update the user's display name with the provided username
+        await updateProfile(result.user, {
+          displayName: username
+        });
+
+        this.router.navigate(['/dashboard']);
+      }
+    } catch (error) {
+      console.error('Error signing in as guest:', error);
       throw error;
     }
   }
