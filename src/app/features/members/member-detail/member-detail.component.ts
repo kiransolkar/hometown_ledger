@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -38,6 +38,8 @@ export class MemberDetailComponent implements OnInit {
   isNewMember = false;
   memberId?: number;
   member?: Member;
+  originalFirstName?: string;
+  originalLastName?: string;
 
   constructor(
     private fb: FormBuilder,
@@ -46,6 +48,27 @@ export class MemberDetailComponent implements OnInit {
     private memberService: MemberService,
     private snackBar: MatSnackBar
   ) {}
+
+  // Custom validator to check if first name and last name are the same
+  private sameNameValidator(control: AbstractControl): ValidationErrors | null {
+    const firstName = control.get('firstName')?.value;
+    const lastName = control.get('lastName')?.value;
+
+    if (firstName && lastName && firstName.trim().toLowerCase() === lastName.trim().toLowerCase()) {
+      // Allow if editing an existing member and names haven't changed from original
+      if (!this.isNewMember &&
+          this.originalFirstName &&
+          this.originalLastName &&
+          firstName.trim().toLowerCase() === this.originalFirstName.toLowerCase() &&
+          lastName.trim().toLowerCase() === this.originalLastName.toLowerCase()) {
+        return null; // Allow keeping original same names
+      }
+
+      return { sameName: true };
+    }
+
+    return null;
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -75,6 +98,21 @@ export class MemberDetailComponent implements OnInit {
       community: ['', Validators.required],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^\+?\d{10,15}$/)]],
       emailAddress: ['', [Validators.required, Validators.email]]
+    }, { validators: this.sameNameValidator.bind(this) });
+
+    // Subscribe to firstName and lastName changes to trigger form-level validation
+    this.memberForm.get('firstName')?.valueChanges.subscribe(() => {
+      // Only update if lastName has a value to avoid unnecessary checks
+      if (this.memberForm.get('lastName')?.value) {
+        this.memberForm.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      }
+    });
+
+    this.memberForm.get('lastName')?.valueChanges.subscribe(() => {
+      // Only update if firstName has a value to avoid unnecessary checks
+      if (this.memberForm.get('firstName')?.value) {
+        this.memberForm.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      }
     });
 
     if (!this.isEditMode) {
@@ -87,6 +125,8 @@ export class MemberDetailComponent implements OnInit {
       this.memberService.getMemberById(this.memberId).subscribe(member => {
         if (member) {
           this.member = member;
+          this.originalFirstName = member.firstName;
+          this.originalLastName = member.lastName;
           this.memberForm.patchValue({
             firstName: member.firstName,
             middleName: member.middleName || '',
@@ -98,6 +138,8 @@ export class MemberDetailComponent implements OnInit {
             phoneNumber: member.phoneNumber,
             emailAddress: member.emailAddress
           });
+          // Re-validate form after loading to check with original names
+          this.memberForm.updateValueAndValidity();
         }
       });
     }

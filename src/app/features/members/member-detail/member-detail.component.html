@@ -48,6 +48,9 @@
                     <mat-error *ngIf="memberForm.get('lastName')?.hasError('required')">
                       Last name is required
                     </mat-error>
+                    <mat-error *ngIf="memberForm.hasError('sameName') && !memberForm.get('lastName')?.hasError('required')">
+                      First name and last name cannot be the same
+                    </mat-error>
                   </mat-form-field>
                 </div>
 
